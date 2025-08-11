@@ -1,0 +1,35 @@
+{
+  "javascript": [
+    {
+      "title": "Event Loop",
+      "content": "<h2>What is the Event Loop?</h2><p>The Event Loop is a mechanism in JavaScript that continuously checks for tasks to execute, processes them one by one, and ensures that asynchronous callbacks run after the current code finishes.</p><h2>What is the Call Stack?</h2><p>The Call Stack is a data structure that keeps track of the functions currently being executed. When a function is called, it’s added (pushed) to the stack, and when it finishes, it’s removed (popped).</p><h2>What are Macrotasks?</h2><p>Macrotasks (or just “tasks”) are units of work that get queued in the task queue and run one by one after the current call stack is empty. Examples include:</p><ul><li>setTimeout callbacks</li><li>setInterval callbacks</li><li>User interactions (clicks, input events)</li><li>Network events (like XHR or fetch responses)</li></ul><h2>What are Microtasks?</h2><p>Microtasks are smaller units of work that run immediately after the current task completes, before the next macrotask starts. They have higher priority. Examples include:</p><ul><li>Promise <code>.then()</code>, <code>.catch()</code>, <code>.finally()</code> callbacks</li><li><code>queueMicrotask()</code> calls</li><li><code>MutationObserver</code> callbacks</li></ul>",
+      "code": "console.log('script start');\n\nPromise.resolve().then(() => {\n  console.log('promise callback start');\n\n  setTimeout(() => {\n    console.log('setTimeout inside promise');\n\n    Promise.resolve().then(() => {\n      console.log('promise inside setTimeout');\n    });\n\n  }, 0);\n\n  console.log('promise callback end');\n});\n\nsetTimeout(() => {\n  console.log('first setTimeout start');\n\n  Promise.resolve().then(() => {\n    console.log('promise inside first setTimeout');\n  });\n\n}, 0);\n\nconsole.log('script end');"
+    },
+    {
+      "title": "Closures",
+      "content": "A closure is a function that remembers the variables from its outer scope even after that scope has exited.",
+      "code": "function outer(){\n  let count = 0;\n  return function inner(){ count++; return count; }\n}\nconst inc = outer();\nconsole.log(inc()); // 1\nconsole.log(inc()); // 2"
+    }
+  ],
+  "typescript": [
+    {
+      "title": "Generics",
+      "content": "Generics allow you to create reusable components that work with different types without losing type safety.",
+      "code": "function identity<T>(value: T): T { return value; }\nconsole.log(identity<string>('Hello'));"
+    }
+  ],
+  "htmlcss": [
+    {
+      "title": "Flexbox Basics",
+      "content": "Flexbox is a layout mode that arranges elements in a row or column, distributing space evenly.",
+      "code": ".container { display: flex; justify-content: space-between; align-items: center; }"
+    }
+  ],
+  "react": [
+    {
+      "title": "useState Hook",
+      "content": "useState lets you add state to functional components in React.",
+      "code": "import { useState } from 'react';\n\nfunction Counter(){\n  const [count, setCount] = useState(0);\n  return <button onClick={()=>setCount(count+1)}>{count}</button>;\n}"
+    }
+  ]
+}
