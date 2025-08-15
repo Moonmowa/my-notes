@@ -5,12 +5,16 @@ import Modal from "./Components/Modal";
 import TopicList from "./Components/TopicList";
 import './index.css'
 import FileManager from "./Practice/FileManager";
+import Stopwatch from "./Practice/Timer";
+import Timer from "./Practice/stop";
 export default function App() {
   const [activeTab, setActiveTab] = useState("javascript");
   const [selectedTopic, setSelectedTopic] = useState(null);
 
   return (
     <div style={{ padding: "20px", fontFamily: "sans-serif" }}>
+      {/* <Stopwatch /> */}
+      {/* <Timer /> */}
       <h1>My Learning Notes</h1>
       {/* <FileManager /> */}
       <Tabs activeTab={activeTab} setActiveTab={setActiveTab} />
