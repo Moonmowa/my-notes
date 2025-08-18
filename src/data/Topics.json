@@ -1,53 +1,52 @@
 {
   "javascript": [
-  {
-    "title": "Event Loop",
-    "content": "<h2>What is the Event Loop?</h2><p><b>The Event Loop</b> is a mechanism in JavaScript that continuously checks for tasks to execute, processes them one by one, and ensures that <i>asynchronous callbacks</i> run after the current code finishes.</p><h2>What is the Call Stack?</h2><p>The <b>Call Stack</b> is a data structure that keeps track of the functions currently being executed. When a function is called, it’s added (<i>pushed</i>) to the stack, and when it finishes, it’s removed (<i>popped</i>).</p><h2>What are Macrotasks?</h2><p><b>Macrotasks</b> (or just “tasks”) are units of work that get queued in the task queue and run one by one after the current call stack is empty. Examples include:</p><ul><li><code>setTimeout</code> callbacks</li><li><code>setInterval</code> callbacks</li><li>User interactions (<i>clicks, input events</i>)</li><li>Network events (like <code>XHR</code> or <code>fetch</code> responses)</li></ul><h2>What are Microtasks?</h2><p><b>Microtasks</b> are smaller units of work that run immediately after the current task completes, before the next macrotask starts. They have higher priority. Examples include:</p><ul><li><code>Promise.then()</code>, <code>Promise.catch()</code>, <code>Promise.finally()</code> callbacks</li><li><code>queueMicrotask()</code> calls</li><li><code>MutationObserver</code> callbacks</li></ul>",
-    "code": "console.log('script start');\n\nPromise.resolve().then(() => {\n  console.log('promise callback start');\n\n  setTimeout(() => {\n    console.log('setTimeout inside promise');\n\n    Promise.resolve().then(() => {\n      console.log('promise inside setTimeout');\n    });\n\n  }, 0);\n\n  console.log('promise callback end');\n});\n\nsetTimeout(() => {\n  console.log('first setTimeout start');\n\n  Promise.resolve().then(() => {\n    console.log('promise inside first setTimeout');\n  });\n\n}, 0);\n\nconsole.log('script end');"
-  },
-  {
-    "title": "Lexical Scope & Closures",
-    "content": "<p><b>Lexical scope</b> means the scope of a variable or any declaration is determined by where it is defined in the source code, not by where it is accessed. <b>A closure</b> is a function that remembers the variables from its outer scope even after that scope has exited. Lexical scope is static, while closures are <i>runtime constructs</i> that allow nested functions to retain access to variables from their lexical scope.</p>",
-    "examples": [
-      {
-        "code": "function outer() {\n  var a = 10;\n  function inner() {\n    console.log(a);\n  }\n  inner();\n}\nouter();",
-        "description": "Here, <code>inner</code> can access <code>a</code> because it is defined within the lexical scope of <code>outer</code>. Lexical scope allows inner functions to see variables from the outer function where they were defined.",
-        "whyItHappens": "The inner function is physically written inside <code>outer</code>, so it can access variables from that scope. <i>Lexical scoping</i> is determined at code definition time."
-      },
-      {
-        "code": "function outer(){\n  let count = 0;\n  return function inner(){ count++; return count; }\n}\nconst inc = outer();\nconsole.log(inc()); // 1\nconsole.log(inc()); // 2",
-        "description": "The inner function forms a <b>closure</b> over <code>count</code>. Even though <code>outer</code> has finished executing, <code>inner</code> retains access to <code>count</code>, so each call increments the same variable.",
-        "whyItHappens": "Closures keep a reference to the variables of their lexical scope, allowing them to persist beyond the lifetime of the outer function."
-      },
-      {
-        "code": "function createFunctions() {\n  let funcs = [];\n  for (var i = 0; i < 3; i++) {\n    funcs.push(function() { console.log(i); });\n  }\n  return funcs;\n}\nconst functions = createFunctions();\nfunctions[0](); // 3\nfunctions[1](); // 3\nfunctions[2](); // 3",
-        "description": "Using <code>var</code> creates a function-scoped variable <code>i</code>. All functions in the array share the same <code>i</code>, which ends at 3 after the loop. So all functions print 3.",
-        "whyItHappens": "<code>var</code> is function-scoped, so the same <code>i</code> is shared across all iterations. Closures capture the variable reference, not its value at the time of creation."
-      },
-      {
-        "code": "function createFunctions() {\n  let funcs = [];\n  for (let i = 0; i < 3; i++) {\n    funcs.push(function() { console.log(i); });\n  }\n  return funcs;\n}\nconst functions = createFunctions();\nfunctions[0](); // 0\nfunctions[1](); // 1\nfunctions[2](); // 2",
-        "description": "<code>let</code> creates a block-scoped variable <code>i</code>. Each iteration has its own <code>i</code>, so each function captures the correct value in a closure.",
-        "whyItHappens": "Block-scoped <code>let</code> ensures a new <code>i</code> is created for each loop iteration. Each closure remembers its specific <code>i</code> value."
-      },
-      {
-        "code": "function createFunctions() {\n  let funcs = [];\n  for (var i = 0; i < 3; i++) {\n    (function(index) {\n      funcs.push(function() { console.log(index); });\n    })(i);\n  }\n  return funcs;\n}\nconst functions = createFunctions();\nfunctions[0](); // 0\nfunctions[1](); // 1\nfunctions[2](); // 2",
-        "description": "An <b>IIFE</b> captures the current value of <code>i</code> as <code>index</code> for each function. This creates a closure over <code>index</code>, allowing each function to log the correct value.",
-        "whyItHappens": "The IIFE executes immediately with the current <code>i</code> value, so each closure retains its own copy of <code>index</code> instead of sharing the same variable."
-      },
-      {
-        "code": "function counter() {\n  let count = 0;\n  return {\n    increment: function() { count++; },\n    getCount: function() { return count; }\n  };\n}\nconst c = counter();\nc.increment();\nc.increment();\nconsole.log(c.getCount()); // 2",
-        "description": "The returned object methods form closures over <code>count</code>. The <code>increment</code> method can modify <code>count</code>, and <code>getCount</code> can read it. The variable persists across multiple method calls.",
-        "whyItHappens": "Closures maintain access to the outer variable <code>count</code>, allowing it to be shared and modified across multiple function calls even after the outer function has finished."
-      },
-      {
-        "code": "var a = 10;\n\nfunction outer() {\n  console.log(a);\n\n  var a = 20;\n\n  function inner() {\n    console.log(a);\n\n    var a = 30;\n    console.log(this.a);\n\n    (function () {\n      console.log(a);\n      console.log(this.a);\n    })();\n  }\n\n  inner();\n}\n\nouter();",
-        "description": "This example demonstrates <b>variable hoisting</b>, shadowing, and how <code>this</code> behaves differently from lexical variables. Variables declared with <code>var</code> are hoisted and may shadow outer variables. Inside the inner function and IIFE, <code>this.a</code> refers to the global object (or undefined in strict mode).",
-        "whyItHappens": "Hoisting moves <code>var</code> declarations to the top of their scope. Lexical variables are accessible according to their declaration, while <code>this</code> is determined by the function call context, not the lexical scope."
-      }
-    ]
-  }
-]
-,
+    {
+      "title": "Event Loop",
+      "content": "<h2>What is the Event Loop?</h2><p><b>The Event Loop</b> is a mechanism in JavaScript that continuously checks for tasks to execute, processes them one by one, and ensures that <i>asynchronous callbacks</i> run after the current code finishes.</p><h2>What is the Call Stack?</h2><p>The <b>Call Stack</b> is a data structure that keeps track of the functions currently being executed. When a function is called, it’s added (<i>pushed</i>) to the stack, and when it finishes, it’s removed (<i>popped</i>).</p><h2>What are Macrotasks?</h2><p><b>Macrotasks</b> (or just “tasks”) are units of work that get queued in the task queue and run one by one after the current call stack is empty. Examples include:</p><ul><li><code>setTimeout</code> callbacks</li><li><code>setInterval</code> callbacks</li><li>User interactions (<i>clicks, input events</i>)</li><li>Network events (like <code>XHR</code> or <code>fetch</code> responses)</li></ul><h2>What are Microtasks?</h2><p><b>Microtasks</b> are smaller units of work that run immediately after the current task completes, before the next macrotask starts. They have higher priority. Examples include:</p><ul><li><code>Promise.then()</code>, <code>Promise.catch()</code>, <code>Promise.finally()</code> callbacks</li><li><code>queueMicrotask()</code> calls</li><li><code>MutationObserver</code> callbacks</li></ul>",
+      "code": "console.log('script start');\n\nPromise.resolve().then(() => {\n  console.log('promise callback start');\n\n  setTimeout(() => {\n    console.log('setTimeout inside promise');\n\n    Promise.resolve().then(() => {\n      console.log('promise inside setTimeout');\n    });\n\n  }, 0);\n\n  console.log('promise callback end');\n});\n\nsetTimeout(() => {\n  console.log('first setTimeout start');\n\n  Promise.resolve().then(() => {\n    console.log('promise inside first setTimeout');\n  });\n\n}, 0);\n\nconsole.log('script end');"
+    },
+    {
+      "title": "Lexical Scope & Closures",
+      "content": "<p><b>Lexical scope</b> means the scope of a variable or any declaration is determined by where it is defined in the source code, not by where it is accessed. <b>A closure</b> is a function that remembers the variables from its outer scope even after that scope has exited. Lexical scope is static, while closures are <i>runtime constructs</i> that allow nested functions to retain access to variables from their lexical scope.</p>",
+      "examples": [
+        {
+          "code": "function outer() {\n  var a = 10;\n  function inner() {\n    console.log(a);\n  }\n  inner();\n}\nouter();",
+          "description": "Here, <code>inner</code> can access <code>a</code> because it is defined within the lexical scope of <code>outer</code>. Lexical scope allows inner functions to see variables from the outer function where they were defined.",
+          "whyItHappens": "The inner function is physically written inside <code>outer</code>, so it can access variables from that scope. <i>Lexical scoping</i> is determined at code definition time."
+        },
+        {
+          "code": "function outer(){\n  let count = 0;\n  return function inner(){ count++; return count; }\n}\nconst inc = outer();\nconsole.log(inc()); // 1\nconsole.log(inc()); // 2",
+          "description": "The inner function forms a <b>closure</b> over <code>count</code>. Even though <code>outer</code> has finished executing, <code>inner</code> retains access to <code>count</code>, so each call increments the same variable.",
+          "whyItHappens": "Closures keep a reference to the variables of their lexical scope, allowing them to persist beyond the lifetime of the outer function."
+        },
+        {
+          "code": "function createFunctions() {\n  let funcs = [];\n  for (var i = 0; i < 3; i++) {\n    funcs.push(function() { console.log(i); });\n  }\n  return funcs;\n}\nconst functions = createFunctions();\nfunctions[0](); // 3\nfunctions[1](); // 3\nfunctions[2](); // 3",
+          "description": "Using <code>var</code> creates a function-scoped variable <code>i</code>. All functions in the array share the same <code>i</code>, which ends at 3 after the loop. So all functions print 3.",
+          "whyItHappens": "<code>var</code> is function-scoped, so the same <code>i</code> is shared across all iterations. Closures capture the variable reference, not its value at the time of creation."
+        },
+        {
+          "code": "function createFunctions() {\n  let funcs = [];\n  for (let i = 0; i < 3; i++) {\n    funcs.push(function() { console.log(i); });\n  }\n  return funcs;\n}\nconst functions = createFunctions();\nfunctions[0](); // 0\nfunctions[1](); // 1\nfunctions[2](); // 2",
+          "description": "<code>let</code> creates a block-scoped variable <code>i</code>. Each iteration has its own <code>i</code>, so each function captures the correct value in a closure.",
+          "whyItHappens": "Block-scoped <code>let</code> ensures a new <code>i</code> is created for each loop iteration. Each closure remembers its specific <code>i</code> value."
+        },
+        {
+          "code": "function createFunctions() {\n  let funcs = [];\n  for (var i = 0; i < 3; i++) {\n    (function(index) {\n      funcs.push(function() { console.log(index); });\n    })(i);\n  }\n  return funcs;\n}\nconst functions = createFunctions();\nfunctions[0](); // 0\nfunctions[1](); // 1\nfunctions[2](); // 2",
+          "description": "An <b>IIFE</b> captures the current value of <code>i</code> as <code>index</code> for each function. This creates a closure over <code>index</code>, allowing each function to log the correct value.",
+          "whyItHappens": "The IIFE executes immediately with the current <code>i</code> value, so each closure retains its own copy of <code>index</code> instead of sharing the same variable."
+        },
+        {
+          "code": "function counter() {\n  let count = 0;\n  return {\n    increment: function() { count++; },\n    getCount: function() { return count; }\n  };\n}\nconst c = counter();\nc.increment();\nc.increment();\nconsole.log(c.getCount()); // 2",
+          "description": "The returned object methods form closures over <code>count</code>. The <code>increment</code> method can modify <code>count</code>, and <code>getCount</code> can read it. The variable persists across multiple method calls.",
+          "whyItHappens": "Closures maintain access to the outer variable <code>count</code>, allowing it to be shared and modified across multiple function calls even after the outer function has finished."
+        },
+        {
+          "code": "var a = 10;\n\nfunction outer() {\n  console.log(a);\n\n  var a = 20;\n\n  function inner() {\n    console.log(a);\n\n    var a = 30;\n    console.log(this.a);\n\n    (function () {\n      console.log(a);\n      console.log(this.a);\n    })();\n  }\n\n  inner();\n}\n\nouter();",
+          "description": "This example demonstrates <b>variable hoisting</b>, shadowing, and how <code>this</code> behaves differently from lexical variables. Variables declared with <code>var</code> are hoisted and may shadow outer variables. Inside the inner function and IIFE, <code>this.a</code> refers to the global object (or undefined in strict mode).",
+          "whyItHappens": "Hoisting moves <code>var</code> declarations to the top of their scope. Lexical variables are accessible according to their declaration, while <code>this</code> is determined by the function call context, not the lexical scope."
+        }
+      ]
+    }
+  ],
   "typescript": [
     {
       "title": "Generics",
@@ -65,8 +64,35 @@
   "react": [
     {
       "title": "useState Hook",
-      "content": "useState lets you add state to functional components in React.",
-      "code": "import { useState } from 'react';\n\nfunction Counter(){\n  const [count, setCount] = useState(0);\n  return <button onClick={()=>setCount(count+1)}>{count}</button>;\n}"
+      "content": "<p><b>useState</b> is a React Hook that allows you to add state to function components. It returns a pair: the <b>state variable</b> (to read the value) and a <b>function</b> (to update the value). Unlike <code>useRef</code>, updating state with <code>setState</code> <i>triggers a re-render</i> of the component with the new state value.</p><p>Structure: <code>const [stateVariable, setStateVariable] = useState(initialValue)</code></p>",
+      "examples": [
+        {
+          "code": "import { useState } from \"react\";\n\nfunction Counter() {\n  const [count, setCount] = useState(0); // state variable + updater function\n\n  return (\n    <div>\n      <h2>Count: {count}</h2>\n      <button onClick={() => setCount(count + 1)}>Increment</button>\n    </div>\n  );\n}\n\nexport default Counter;",
+          "description": "Here, <code>count</code> is the state variable and <code>setCount</code> is the updater function. Each call to <code>setCount</code> triggers a re-render, showing the updated value on screen.",
+          "whyItHappens": "React keeps track of the state between renders using its internal hooks system. When <code>setCount</code> is called, React schedules a re-render with the new state value."
+        },
+        {
+          "code": "import { useState } from \"react\";\n\nfunction Toggle() {\n  const [isOn, setIsOn] = useState(false);\n\n  const toggle = () => setIsOn((prev) => !prev);\n\n  return (\n    <div>\n      <p>The switch is {isOn ? 'ON' : 'OFF'}</p>\n      <button onClick={toggle}>Toggle</button>\n    </div>\n  );\n}\n\nexport default Toggle;",
+          "description": "Here, <code>isOn</code> is the state variable and <code>setIsOn</code> is the function to update it. The updater is called with a callback that receives the previous state.",
+          "whyItHappens": "React guarantees that the state update function (<code>setIsOn</code>) always uses the latest state. Using a callback form avoids bugs when multiple updates happen quickly."
+        }
+      ]
+    },
+    {
+      "title": "useRef Hook",
+      "content": "<p><b>useRef</b> is a React Hook that provides a way to persist values across re-renders without causing a re-render when the value changes. It returns a mutable object with a single property called <code>.current</code>. This makes it useful for two main cases: <b>accessing DOM elements</b> and <b>storing mutable values</b> that survive across renders (like instance variables in class components).</p>",
+      "examples": [
+        {
+          "code": "import { useRef, useEffect } from \"react\";\n\nfunction InputFocus() {\n  const inputRef = useRef(null);\n\n  useEffect(() => {\n    inputRef.current?.focus(); // Focus the input after mount\n  }, []);\n\n  return <input ref={inputRef} type=\"text\" />;\n}\n\nexport default InputFocus;",
+          "description": "Here, <code>useRef</code> is used to access a DOM element safely. The <code>inputRef.current</code> holds a reference to the input element, allowing us to call <code>focus()</code> directly.",
+          "whyItHappens": "React assigns the DOM node to <code>ref.current</code> when the element is mounted. Unlike <code>document.getElementById</code>, this approach is component-safe and works in React’s declarative model."
+        },
+        {
+          "code": "import { useState, useRef } from \"react\";\n\nfunction Timer() {\n  const [count, setCount] = useState(0);\n  const intervalRef = useRef(null); // behaves like an instance variable\n\n  const startTimer = () => {\n    if (intervalRef.current) return;\n    intervalRef.current = setInterval(() => {\n      setCount((c) => c + 1);\n    }, 1000);\n  };\n\n  const stopTimer = () => {\n    clearInterval(intervalRef.current);\n    intervalRef.current = null;\n  };\n\n  return (\n    <div>\n      <h2>Count: {count}</h2>\n      <button onClick={startTimer}>Start</button>\n      <button onClick={stopTimer}>Stop</button>\n    </div>\n  );\n}\n\nexport default Timer;",
+          "description": "Here, <code>useRef</code> is used to store a mutable value (the interval ID). It persists across re-renders but does not trigger a re-render when updated.",
+          "whyItHappens": "The object returned by <code>useRef</code> remains the same across renders. Updating <code>.current</code> does not cause re-renders, making it ideal for values like timers or external references."
+        }
+      ]
     }
   ]
 }

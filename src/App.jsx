@@ -7,19 +7,26 @@ import './index.css'
 import FileManager from "./Practice/FileManager";
 import Stopwatch from "./Practice/Timer";
 import Timer from "./Practice/stop";
+import PomodoroApp from "./Practice/TimersTabs";
+import Carousel from "./Practice/Carousel";
 export default function App() {
   const [activeTab, setActiveTab] = useState("javascript");
   const [selectedTopic, setSelectedTopic] = useState(null);
 
   return (
-    <div style={{ padding: "20px", fontFamily: "sans-serif" }}>
-      {/* <Stopwatch /> */}
-      {/* <Timer /> */}
-      <h1>My Learning Notes</h1>
-      {/* <FileManager /> */}
-      <Tabs activeTab={activeTab} setActiveTab={setActiveTab} />
-      <TopicList topics={topicsData[activeTab]} onSelect={setSelectedTopic} />
-      <Modal topic={selectedTopic} onClose={() => setSelectedTopic(null)} />
-    </div>
+    // <ThemeContextProvider>
+      <div style={{ padding: "20px", fontFamily: "sans-serif" }}>
+        {/* <Stopwatch /> */}
+        {/* <Timer /> */}
+        <h1>My Learning Notes</h1>
+        {/* <FileManager /> */}
+        <Tabs activeTab={activeTab} setActiveTab={setActiveTab} />
+        <TopicList topics={topicsData[activeTab]} onSelect={setSelectedTopic} />
+        <Modal topic={selectedTopic} onClose={() => setSelectedTopic(null)} />
+        {/* <PomodoroApp />
+        <Carousel /> */}
+      </div>
+    // </ThemeContextProvider>
+
   );
 }
