@@ -9,6 +9,7 @@ import Stopwatch from "./Practice/Timer";
 import Timer from "./Practice/stop";
 import PomodoroApp from "./Practice/TimersTabs";
 import Carousel from "./Practice/Carousel";
+import Form from "./Practice/useReducer";
 export default function App() {
   const [activeTab, setActiveTab] = useState("javascript");
   const [selectedTopic, setSelectedTopic] = useState(null);
@@ -25,6 +26,7 @@ export default function App() {
         <Modal topic={selectedTopic} onClose={() => setSelectedTopic(null)} />
         {/* <PomodoroApp />
         <Carousel /> */}
+        {/* <Form /> */}
       </div>
     // </ThemeContextProvider>
 

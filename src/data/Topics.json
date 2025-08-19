@@ -1,6 +1,90 @@
 {
   "javascript": [
     {
+      "title": "Declaring variables: var, let, const & Temporal Dead Zone",
+      "content": "In JavaScript, variables can be declared using var, let, and const. 'var' is function-scoped and hoisted with undefined initialization. 'let' and 'const' are block-scoped and reside in the Temporal Dead Zone (TDZ) from the start of their block until their declaration is evaluated. Accessing them before declaration throws a ReferenceError. 'const' also requires an initializer and cannot be reassigned. This helps avoid accidental overwrites and maintains predictable scoping.",
+      "examples": [
+        {
+          "code": "console.log(a);\nvar a = 10;",
+          "description": "Variable declared with 'var' is hoisted; outputs undefined.",
+          "whyItHappens": "'var' declarations are hoisted with default value undefined, so accessing before assignment doesn't throw an error."
+        },
+        {
+          "code": "console.log(b);\nlet b = 20;",
+          "description": "Variable declared with 'let' is in Temporal Dead Zone; throws ReferenceError.",
+          "whyItHappens": "'let' is block-scoped and not initialized until the line is executed, creating a TDZ."
+        },
+        {
+          "code": "const c = 30;\nc = 40;",
+          "description": "Cannot reassign a 'const' variable; throws TypeError.",
+          "whyItHappens": "'const' must be initialized and cannot be reassigned after declaration."
+        }
+      ]
+    },
+    {
+      "title": "Equality operators (== vs ===)",
+      "content": "'==' is the abstract equality operator, which compares values after type coercion. '===' is the strict equality operator, which compares both value and type without coercion. Using '===' avoids unexpected type conversions and is generally recommended.",
+      "examples": [
+        {
+          "code": "5 == '5';",
+          "description": "Abstract equality allows type coercion; returns true.",
+          "whyItHappens": "JavaScript converts the string '5' to number 5 before comparison."
+        },
+        {
+          "code": "5 === '5';",
+          "description": "Strict equality compares value and type; returns false.",
+          "whyItHappens": "Number and string types are different; no coercion happens."
+        },
+        {
+          "code": "null == undefined;\nnull === undefined;",
+          "description": "Abstract equality: true, Strict equality: false",
+          "whyItHappens": "'==' considers null and undefined equal, but '===' checks type as well."
+        }
+      ]
+    },
+    {
+      "title": "Spread (...) and rest parameters",
+      "content": "The spread operator '...' expands iterable elements like arrays or objects into individual elements. Rest parameters '...' collect multiple arguments into an array. Spread is used in function calls, array/object copying, or merging. Rest is used in function definitions to handle variable numbers of arguments.",
+      "examples": [
+        {
+          "code": "const arr = [1,2,3];\nconst newArr = [...arr, 4, 5];",
+          "description": "Spread operator expands array elements into new array.",
+          "whyItHappens": "'...' spreads the elements individually; newArr becomes [1,2,3,4,5]."
+        },
+        {
+          "code": "function sum(...nums) { return nums.reduce((a,b) => a+b, 0); }\nsum(1,2,3,4);",
+          "description": "Rest parameter collects all arguments into array 'nums'.",
+          "whyItHappens": "'...nums' gathers any number of arguments passed to the function."
+        },
+        {
+          "code": "const obj1 = {a:1, b:2};\nconst obj2 = {...obj1, c:3};",
+          "description": "Spread operator copies properties into new object.",
+          "whyItHappens": "'...' expands key-value pairs from obj1 into obj2."
+        }
+      ]
+    },
+    {
+      "title": "Destructuring (array & object)",
+      "content": "Destructuring allows extracting values from arrays or objects into distinct variables in a concise syntax. Array destructuring uses position, while object destructuring uses property names. Default values can be provided during destructuring.",
+      "examples": [
+        {
+          "code": "const arr = [1,2,3];\nconst [x, y] = arr;",
+          "description": "Array destructuring assigns 1 to x and 2 to y.",
+          "whyItHappens": "Positions in array match the variable order in destructuring."
+        },
+        {
+          "code": "const obj = {a:10, b:20};\nconst {a, b} = obj;",
+          "description": "Object destructuring assigns properties 'a' and 'b' to variables.",
+          "whyItHappens": "Variable names match object property names for assignment."
+        },
+        {
+          "code": "const {a, c=30} = obj;",
+          "description": "Default value 30 assigned to c since 'c' property does not exist in obj.",
+          "whyItHappens": "Provides fallback when property is undefined."
+        }
+      ]
+    },
+    {
       "title": "Event Loop",
       "content": "<h2>What is the Event Loop?</h2><p><b>The Event Loop</b> is a mechanism in JavaScript that continuously checks for tasks to execute, processes them one by one, and ensures that <i>asynchronous callbacks</i> run after the current code finishes.</p><h2>What is the Call Stack?</h2><p>The <b>Call Stack</b> is a data structure that keeps track of the functions currently being executed. When a function is called, it’s added (<i>pushed</i>) to the stack, and when it finishes, it’s removed (<i>popped</i>).</p><h2>What are Macrotasks?</h2><p><b>Macrotasks</b> (or just “tasks”) are units of work that get queued in the task queue and run one by one after the current call stack is empty. Examples include:</p><ul><li><code>setTimeout</code> callbacks</li><li><code>setInterval</code> callbacks</li><li>User interactions (<i>clicks, input events</i>)</li><li>Network events (like <code>XHR</code> or <code>fetch</code> responses)</li></ul><h2>What are Microtasks?</h2><p><b>Microtasks</b> are smaller units of work that run immediately after the current task completes, before the next macrotask starts. They have higher priority. Examples include:</p><ul><li><code>Promise.then()</code>, <code>Promise.catch()</code>, <code>Promise.finally()</code> callbacks</li><li><code>queueMicrotask()</code> calls</li><li><code>MutationObserver</code> callbacks</li></ul>",
       "code": "console.log('script start');\n\nPromise.resolve().then(() => {\n  console.log('promise callback start');\n\n  setTimeout(() => {\n    console.log('setTimeout inside promise');\n\n    Promise.resolve().then(() => {\n      console.log('promise inside setTimeout');\n    });\n\n  }, 0);\n\n  console.log('promise callback end');\n});\n\nsetTimeout(() => {\n  console.log('first setTimeout start');\n\n  Promise.resolve().then(() => {\n    console.log('promise inside first setTimeout');\n  });\n\n}, 0);\n\nconsole.log('script end');"
@@ -43,6 +127,52 @@
           "code": "var a = 10;\n\nfunction outer() {\n  console.log(a);\n\n  var a = 20;\n\n  function inner() {\n    console.log(a);\n\n    var a = 30;\n    console.log(this.a);\n\n    (function () {\n      console.log(a);\n      console.log(this.a);\n    })();\n  }\n\n  inner();\n}\n\nouter();",
           "description": "This example demonstrates <b>variable hoisting</b>, shadowing, and how <code>this</code> behaves differently from lexical variables. Variables declared with <code>var</code> are hoisted and may shadow outer variables. Inside the inner function and IIFE, <code>this.a</code> refers to the global object (or undefined in strict mode).",
           "whyItHappens": "Hoisting moves <code>var</code> declarations to the top of their scope. Lexical variables are accessible according to their declaration, while <code>this</code> is determined by the function call context, not the lexical scope."
+        }
+      ]
+    },
+    {
+      "title": "Execution Context",
+      "content": "<p><b>Execution Context</b> is the environment in which JavaScript code runs.</p><p><b>👉 Types:</b></p><ul style='margin-left:20px; color:#2b6cb0;'><li><b>Global Execution Context (GEC):</b> Created once at program start, holds global objects (<code>window</code> / <code>global</code>) and <code>this</code>.</li><li><b>Function Execution Context (FEC):</b> Created whenever a function is invoked, each call gets its own context.</li><li><b>Eval Execution Context:</b> Rare, discouraged.</li></ul><p><b>👉 Phases:</b></p><ul style='margin-left:20px; color:#38a169;'><li><b>Creation Phase:</b> Creates variable environment (hoists <code>var</code>, function declarations), creates lexical environment (scopes for <code>let</code>/<code>const</code>), sets up <code>this</code>.</li><li><b>Execution Phase:</b> Assigns values and executes code line by line.</li></ul>",
+      "examples": [
+        {
+          "code": "console.log(a); // undefined\nvar a = 5;\n\nconsole.log(b); // ReferenceError\nlet b = 10;",
+          "description": "Demonstrates how <code>var</code> is hoisted and initialized as <code>undefined</code>, while <code>let</code> is hoisted but stays in the <b>Temporal Dead Zone</b> until initialized.",
+          "whyItHappens": "In the <b>creation phase</b>, variables declared with <code>var</code> are set to <code>undefined</code>. <code>let</code> and <code>const</code> are hoisted too but left uninitialized, so accessing them before their declaration causes a ReferenceError."
+        },
+        {
+          "code": "function foo() {\n  console.log(a);\n  var a = 10;\n  console.log(b);\n  let b = 20;\n}\nfoo();",
+          "description": "Within a function execution context, <code>var</code> is hoisted to the top of its scope as <code>undefined</code>, while <code>let</code> stays in the Temporal Dead Zone.",
+          "whyItHappens": "During creation, the function context hoists <code>a</code> (var) and <code>b</code> (let). But <code>a</code> is initialized to <code>undefined</code>, while <code>b</code> remains in TDZ until its line executes."
+        },
+        {
+          "code": "var x = 1;\nfunction outer() {\n  console.log(x);\n  var x = 2;\n  function inner() {\n    console.log(x);\n  }\n  inner();\n}\nouter();",
+          "description": "Looks like <code>console.log(x)</code> should print 1, but it actually prints <code>undefined</code>. Inner prints 2.",
+          "whyItHappens": "Inside <code>outer</code>, <code>var x</code> is hoisted to the top of the function, shadowing the global <code>x</code>. So the first log is <code>undefined</code> (before assignment). Inner inherits that <code>x</code> from its lexical scope, so it prints 2."
+        },
+        {
+          "code": "var a = 100;\nfunction test() {\n  console.log(a);\n  var a = 200;\n  console.log(this.a);\n}\ntest();",
+          "description": "Prints <code>undefined</code> then <code>100</code>.",
+          "whyItHappens": "<code>a</code> inside <code>test</code> is hoisted, so the first log sees it as <code>undefined</code>. <code>this.a</code> refers to the global object’s <code>a</code> (100 in non-strict mode). This shows the difference between variable environment and <code>this</code> binding."
+        },
+        {
+          "code": "var a = 10;\n(function() {\n  console.log(a);\n  var a = 20;\n  console.log(a);\n})();",
+          "description": "Prints <code>undefined</code> then <code>20</code>.",
+          "whyItHappens": "Within the IIFE execution context, <code>a</code> is hoisted and initialized as <code>undefined</code>, shadowing the outer <code>a</code>. After assignment, <code>a</code> becomes 20."
+        },
+        {
+          "code": "function tricky() {\n  console.log(a);\n  console.log(b);\n  var a = 1;\n  let b = 2;\n}\ntry {\n  tricky();\n} catch (e) {\n  console.log('Error:', e.message);\n}",
+          "description": "Logs <code>undefined</code> for <code>a</code>, then throws a <code>ReferenceError</code> for <code>b</code>.",
+          "whyItHappens": "Hoisting puts <code>a</code> into memory as <code>undefined</code>, but <code>b</code> is hoisted into TDZ. Attempting to access it before declaration triggers a ReferenceError."
+        },
+        {
+          "code": "var a = 10;\nfunction outer() {\n  var a = 20;\n  function inner() {\n    var a = 30;\n    console.log(a);\n    console.log(this.a);\n  }\n  inner();\n}\nouter();",
+          "description": "Prints <code>30</code> then <code>10</code>.",
+          "whyItHappens": "The innermost <code>a</code> shadows outer ones. <code>this.a</code> points to global <code>a</code> (10) because <code>inner()</code> is called as a plain function (not as a method). This tests understanding of both execution context and <code>this</code>."
+        },
+        {
+          "code": "console.log(foo);\nfunction foo() { return 'declared'; }\nvar foo = 'assigned';",
+          "description": "Prints the function definition, not <code>undefined</code> or 'assigned'.",
+          "whyItHappens": "Function declarations are hoisted before variables. So during creation, <code>foo</code> is first bound to the function. Later, <code>var foo</code> is hoisted but ignored since it’s already declared. Only after execution, <code>foo</code> becomes 'assigned'."
         }
       ]
     }

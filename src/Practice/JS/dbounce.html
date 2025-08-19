@@ -1,0 +1,26 @@
+<html>
+
+<body>
+    <input id="search" type="text" />
+    <div id="show"></div>
+</body>
+<script>
+    const debounce = function (fun, delay) {
+        let timeout;
+        return function (...args) {
+            clearInterval(timeout)
+            timeout = setTimeout(() => {
+                func(...args)
+            }, delay)
+        }
+    }
+    const func = (e) => {
+        let div = document.getElementById('show')
+        const value = e.target.value;
+        div.innerHTML = value
+    }
+    const bindedDbounce = debounce(func, 300);
+    document.getElementById('search').addEventListener('input', bindedDbounce);
+</script>
+
+</html>

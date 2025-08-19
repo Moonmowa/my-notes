@@ -1,0 +1,25 @@
+<html>
+
+<body>
+    <input id="search" type="text" />
+    <div id="show"></div>
+</body>
+<script>
+    let timeout;
+    let userTyping = false;
+    document.getElementById('search').addEventListener('input', function (e) {
+        let div = document.getElementById('show')
+        const value = e.target.value;
+        if (userTyping) return null
+        
+        userTyping = true;
+        div.innerHTML = value
+
+        timeout = setTimeout(() => {
+            userTyping = false;
+        }, 3000)
+
+    })
+</script>
+
+</html>
