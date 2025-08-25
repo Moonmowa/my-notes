@@ -5,7 +5,7 @@
     <div id="show"></div>
 </body>
 <script>
-    const debounce = function (fun, delay) {
+    export const debounce = function (fun, delay) {
         let timeout;
         return function (...args) {
             clearInterval(timeout)

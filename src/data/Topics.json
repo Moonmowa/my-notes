@@ -175,6 +175,94 @@
           "whyItHappens": "Function declarations are hoisted before variables. So during creation, <code>foo</code> is first bound to the function. Later, <code>var foo</code> is hoisted but ignored since it’s already declared. Only after execution, <code>foo</code> becomes 'assigned'."
         }
       ]
+    },
+    {
+      "title": "Objects in JavaScript",
+      "content": "<p><b>Objects</b> in JavaScript are collections of key-value pairs. Keys are usually strings (or symbols), and values can be primitives, functions, or other objects. Objects allow us to model real-world entities and encapsulate related data and behavior.</p><p>In JavaScript, almost everything is an object (arrays, functions, dates, regex, etc.), except the 7 primitive types (number, bigint, string, boolean, undefined, null, symbol).</p>",
+      "examples": [
+        {
+          "code": "const person = {\n  name: \"Alice\",\n  age: 25,\n  greet: function() {\n    console.log(\"Hello, I'm \" + this.name);\n  }\n};\n\nperson.greet(); // Hello, I'm Alice",
+          "description": "An object literal with properties and a method. Keys are strings and values can be anything.",
+          "whyItHappens": "Objects group related data and behavior together, making them the building blocks for complex structures."
+        },
+        {
+          "code": "const obj = { a: 1, b: 2 };",
+          "description": "The most common way: <b>Object literal</b> syntax with key-value pairs.",
+          "whyItHappens": "Object literals are concise and the preferred way to create simple objects."
+        },
+        {
+          "code": "const obj = new Object();\nobj.a = 1;",
+          "description": "Using the <b>new Object()</b> constructor to create an empty object, then adding properties.",
+          "whyItHappens": "This is less common and more verbose, but functionally equivalent to object literals."
+        },
+        {
+          "code": "function Person(name) {\n  this.name = name;\n}\n\nconst p1 = new Person(\"Alice\");\nconsole.log(p1.name); // Alice",
+          "description": "Using a <b>constructor function</b> to create objects with shared structure.",
+          "whyItHappens": "Constructor functions (and later ES6 classes) provide a way to generate multiple similar objects efficiently."
+        },
+        {
+          "code": "const proto = { greet() { console.log(\"Hi!\"); } };\nconst obj = Object.create(proto);\nobj.greet(); // Hi!",
+          "description": "Using <b>Object.create()</b> to create a new object with a given prototype.",
+          "whyItHappens": "This allows explicit control over an object's prototype, making it a powerful tool for prototype-based inheritance."
+        },
+        {
+          "code": "class Person {\n  constructor(name) {\n    this.name = name;\n  }\n}\n\nconst p1 = new Person(\"Alice\");\nconsole.log(p1.name); // Alice",
+          "description": "Using ES6 <b>class syntax</b> to create objects.",
+          "whyItHappens": "Classes are syntactic sugar over constructor functions + prototypes, making OOP patterns easier to read and use."
+        }
+      ]
+    },
+    {
+      "title": "Property Access in Objects",
+      "content": "<p><b>Property access</b> controls how you read/write values on objects. Use <code>dot</code> for static keys and <code>bracket</code> for dynamic keys, spaces, special chars, or symbols. Optional chaining (<code>?.</code>) and nullish coalescing (<code>??</code>) make nested access safe.</p><ul><li><b>Dot</b>: <code>obj.key</code></li><li><b>Bracket</b>: <code>obj[expr]</code> where <i>expr</i> resolves to the key</li><li><b>Symbols</b>: non-string unique keys</li><li><b>Optional chaining</b>: short-circuits on <code>null</code>/<code>undefined</code></li><li><b>\"in\" vs <code>hasOwn</code></b>: <code>in</code> checks prototype chain; <code>Object.hasOwn()</code> checks only own props</li></ul>",
+      "examples": [
+        {
+          "code": "const user = { name: \"CD\", \"fav color\": \"teal\" };\n// Dot vs bracket\nconsole.log(user.name); // dot for simple identifiers\nconsole.log(user[\"fav color\"]); // bracket for spaces/special chars\n\nconst key = 'name';\nconsole.log(user[key]); // dynamic access",
+          "description": "Use dot for simple, bracket for computed/dynamic or special-key access.",
+          "whyItHappens": "Dot requires a valid identifier known at author time. Bracket evaluates an expression to a string/symbol key at runtime."
+        },
+        {
+          "code": "const id = Symbol('id');\nconst obj = { [id]: 123, id: 'string key' };\nconsole.log(obj[id]); // 123 (symbol key)\nconsole.log(obj.id); // 'string key' (string key)",
+          "description": "Symbols create non-colliding keys you can only access via the same symbol reference.",
+          "whyItHappens": "Each Symbol value is unique; property lookups must use the exact symbol to match."
+        },
+        {
+          "code": "const data = { settings: { theme: { name: 'dark' } } };\nconsole.log(data.settings?.theme?.name); // 'dark'\nconsole.log(data.profile?.email ?? 'no email'); // 'no email'",
+          "description": "Optional chaining prevents errors on missing links; nullish coalescing provides defaults only for null/undefined.",
+          "whyItHappens": "<code>?.</code> stops evaluation and returns undefined if the left side is nullish; <code>??</code> returns the right side only when the left is null or undefined."
+        },
+        {
+          "code": "const base = { kind: 'base' };\nconst child = Object.create(base);\nchild.own = true;\nconsole.log('kind' in child); // true (via prototype)\nconsole.log(Object.hasOwn(child, 'kind')); // false (not own)\nconsole.log(Object.hasOwn(child, 'own')); // true",
+          "description": "Differentiate own vs inherited properties when checking for existence.",
+          "whyItHappens": "The <code>in</code> operator walks the prototype chain; <code>Object.hasOwn</code> only checks the object's own property bag."
+        }
+      ]
+    },
+    {
+      "title": "Core Object Methods (keys, values, entries, fromEntries, assign)",
+      "content": "<p>These methods help you list, transform, or merge object properties. They operate on <b>own enumerable</b> string-keyed props unless noted.</p><ul><li><code>Object.keys(obj)</code> → string keys</li><li><code>Object.values(obj)</code> → values</li><li><code>Object.entries(obj)</code> → <code>[[key,value],...]</code></li><li><code>Object.fromEntries(iter)</code> → entries → object</li><li><code>Object.assign(target, ...sources)</code> → shallow merge</li><li><code>Object.hasOwn(obj, key)</code> → own-prop check</li></ul><p>For descriptors and non-enumerables, use <code>Object.getOwnPropertyNames</code>, <code>Object.getOwnPropertySymbols</code>, <code>Object.getOwnPropertyDescriptors</code>.</p>",
+      "examples": [
+        {
+          "code": "const user = { name: 'CD', age: 26 };\nconsole.log(Object.keys(user)); // ['name', 'age']\nconsole.log(Object.values(user)); // ['CD', 26]\nfor (const [k,v] of Object.entries(user)) {\n console.log(k, v);\n}",
+          "description": "Enumerate keys/values/pairs of own enumerable props.",
+          "whyItHappens": "These helpers avoid <code>for...in</code> pitfalls (which iterate inherited props) and return arrays suitable for iteration."
+        },
+        {
+          "code": "// Transform object → entries → map → object\nconst prices = { apple: 100, banana: 80 };\nconst withTax = Object.fromEntries(\n Object.entries(prices).map(([k, v]) => [k, Math.round(v * 1.18)])\n);\nconsole.log(withTax); // { apple: 118, banana: 94 }",
+          "description": "Use entries + map + fromEntries to transform objects functionally.",
+          "whyItHappens": "Entries provide a list representation you can map/filter, then rebuild with fromEntries."
+        },
+        {
+          "code": "// Shallow merge\nconst a = { x: 1, nested: { n: 1 } };\nconst b = { y: 2, nested: { m: 2 } };\nconst merged = Object.assign({}, a, b);\nconsole.log(merged); // { x:1, nested:{ m:2 }, y:2 }\nconsole.log(merged.nested === b.nested); // true (shallow)",
+          "description": "<code>assign</code> merges sources left→right, overwriting keys; nested objects are not deep-cloned.",
+          "whyItHappens": "<code>assign</code> copies property <i>values</i>; if a value is an object, the reference is copied (shallow)."
+        },
+        {
+          "code": "const obj = Object.create({ inherited: true });\nobj.own = 1;\nconsole.log(Object.hasOwn(obj, 'own')); // true\nconsole.log(Object.hasOwn(obj, 'inherited')); // false",
+          "description": "Use <code>Object.hasOwn</code> instead of <code>obj.hasOwnProperty</code> to avoid shadowing issues.",
+          "whyItHappens": "Calling the static <code>Object.hasOwn</code> avoids cases where an object overrides or lacks <code>hasOwnProperty</code>."
+        }
+      ]
     }
   ],
   "typescript": [
@@ -221,6 +309,22 @@
           "code": "import { useState, useRef } from \"react\";\n\nfunction Timer() {\n  const [count, setCount] = useState(0);\n  const intervalRef = useRef(null); // behaves like an instance variable\n\n  const startTimer = () => {\n    if (intervalRef.current) return;\n    intervalRef.current = setInterval(() => {\n      setCount((c) => c + 1);\n    }, 1000);\n  };\n\n  const stopTimer = () => {\n    clearInterval(intervalRef.current);\n    intervalRef.current = null;\n  };\n\n  return (\n    <div>\n      <h2>Count: {count}</h2>\n      <button onClick={startTimer}>Start</button>\n      <button onClick={stopTimer}>Stop</button>\n    </div>\n  );\n}\n\nexport default Timer;",
           "description": "Here, <code>useRef</code> is used to store a mutable value (the interval ID). It persists across re-renders but does not trigger a re-render when updated.",
           "whyItHappens": "The object returned by <code>useRef</code> remains the same across renders. Updating <code>.current</code> does not cause re-renders, making it ideal for values like timers or external references."
+        }
+      ]
+    },
+    {
+      "title": "useReducer Hook",
+      "content": "<p><b>useReducer</b> is a React Hook used for managing complex state logic in a component. It is an alternative to <code>useState</code> and is particularly useful when state involves multiple sub-values or when state updates depend on the previous state. <b>useReducer</b> takes a <code>reducer</code> function and an <code>initialState</code>, returning a pair: the current <code>state</code> and a <code>dispatch</code> function to send actions that describe how to update the state.</p>",
+      "examples": [
+        {
+          "code": "import { useReducer } from \"react\";\n\nconst initialState = { count: 0 };\n\nfunction reducer(state, action) {\n  switch (action.type) {\n    case 'increment':\n      return { count: state.count + 1 };\n    case 'decrement':\n      return { count: state.count - 1 };\n    case 'reset':\n      return { count: 0 };\n    default:\n      return state;\n  }\n}\n\nexport default function Counter() {\n  const [state, dispatch] = useReducer(reducer, initialState);\n\n  return (\n    <div>\n      <h2>Count: {state.count}</h2>\n      <button onClick={() => dispatch({ type: 'decrement' })}>-</button>\n      <button onClick={() => dispatch({ type: 'increment' })}>+</button>\n      <button onClick={() => dispatch({ type: 'reset' })}>Reset</button>\n    </div>\n  );\n}",
+          "description": "In this example, <code>useReducer</code> manages a simple counter. The <code>dispatch</code> function is used to send actions like 'increment', 'decrement', and 'reset', and the reducer returns the updated state based on the action type.",
+          "whyItHappens": "The reducer function is a pure function that determines how state changes in response to dispatched actions. This pattern centralizes state updates and makes complex state transitions predictable and easier to debug."
+        },
+        {
+          "code": "import { useReducer } from \"react\";\n\nconst initialState = {\n  formValues: { name: '', age: '', email: '' }\n};\n\nfunction formReducer(state, action) {\n  switch (action.type) {\n    case 'UPDATE_FIELD':\n      return {\n        ...state,\n        formValues: {\n          ...state.formValues,\n          [action.field]: action.value\n        }\n      };\n    default:\n      return state;\n  }\n}\n\nexport default function Form() {\n  const [state, dispatch] = useReducer(formReducer, initialState);\n\n  return (\n    <form>\n      <input\n        value={state.formValues.name}\n        placeholder=\"Name\"\n        onChange={e => dispatch({ type: 'UPDATE_FIELD', field: 'name', value: e.target.value })}\n      />\n      <input\n        value={state.formValues.age}\n        placeholder=\"Age\"\n        onChange={e => dispatch({ type: 'UPDATE_FIELD', field: 'age', value: e.target.value })}\n      />\n      <input\n        value={state.formValues.email}\n        placeholder=\"Email\"\n        onChange={e => dispatch({ type: 'UPDATE_FIELD', field: 'email', value: e.target.value })}\n      />\n      <pre>{JSON.stringify(state.formValues, null, 2)}</pre>\n    </form>\n  );\n}",
+          "description": "Here, <code>useReducer</code> manages a form with multiple fields. The reducer handles an 'UPDATE_FIELD' action to dynamically update any form field while preserving the other fields.",
+          "whyItHappens": "Using a reducer for form state centralizes updates and makes it easier to manage multiple related fields. Each dispatched action carries the field name and value, and the reducer merges it with the existing state."
         }
       ]
     }
