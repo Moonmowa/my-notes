@@ -263,6 +263,32 @@
           "whyItHappens": "Calling the static <code>Object.hasOwn</code> avoids cases where an object overrides or lacks <code>hasOwnProperty</code>."
         }
       ]
+    },
+    {
+      "title": "Event Bubbling, Capturing & Delegation",
+      "content": "<p><b>Event Capturing:</b> The first phase in the DOM event flow where the event travels from the root element down to the target element.</p><p><b>Event Target:</b> The second phase where the event reaches the actual element that triggered it.</p><p><b>Event Bubbling:</b> The third phase where the event propagates back up from the target element to the root.</p><p><b>Event Delegation:</b> A technique that leverages event bubbling by attaching a single event listener to a parent element to handle events from its child elements efficiently.</p>",
+      "examples": [
+        {
+          "code": "document.querySelector('#parent').addEventListener('click', () => {\n  console.log('Parent clicked!');\n});\n\ndocument.querySelector('#child').addEventListener('click', () => {\n  console.log('Child clicked!');\n});",
+          "description": "When you click the child, the browser fires the event on the child first, then bubbles it up to the parent.",
+          "whyItHappens": "Events in JavaScript bubble up the DOM tree by default. After the target element handles the event, the same event propagates to its ancestors unless `stopPropagation()` is called."
+        },
+        {
+          "code": "document.querySelector('#parent').addEventListener('click', () => {\n  console.log('Parent capture');\n}, true);\n\ndocument.querySelector('#child').addEventListener('click', () => {\n  console.log('Child target');\n});",
+          "description": "Here, the parent listener uses the `capture` phase by passing `true` as the third argument. The order will be: parent capture → child target → parent bubble (if another listener without capture exists).",
+          "whyItHappens": "The DOM event flow has three phases: <b>capturing</b> (top-down), <b>target</b> (on the element itself), and <b>bubbling</b> (bottom-up). By default, listeners use the bubbling phase unless capture is explicitly set."
+        },
+        {
+          "code": "document.querySelector('#list').addEventListener('click', (e) => {\n  if (e.target.tagName === 'LI') {\n    console.log('Clicked item:', e.target.textContent);\n  }\n});",
+          "description": "Instead of attaching a click listener to each <li>, a single listener is attached to the parent <ul>. Bubbling ensures the event reaches the parent, where we check if the click originated from a child <li>.",
+          "whyItHappens": "This is <b>event delegation</b>. Since events bubble up, one handler on the parent can handle all child items efficiently. This is useful for dynamic lists where child elements may be added or removed."
+        },
+        {
+          "code": "import React from 'react';\n\nfunction Card({ onNavigate, onDelete }) {\n  return (\n    <div\n      onClick={onNavigate}\n      style={{ border: '1px solid gray', padding: '10px', margin: '10px' }}\n    >\n      <h3>Card Title</h3>\n      <button\n        onClick={(e) => {\n          e.stopPropagation(); // prevent bubbling to card\n          onDelete();\n        }}\n      >\n        Delete\n      </button>\n    </div>\n  );\n}\n\nexport default function App() {\n  const handleNavigate = () => alert('Navigating to details...');\n  const handleDelete = () => alert('Card deleted');\n\n  return <Card onNavigate={handleNavigate} onDelete={handleDelete} />;\n}",
+          "description": "This example shows a card component that navigates when clicked. Inside the card, there is a delete button. Without <code>stopPropagation</code>, clicking delete would also trigger the card’s navigation handler. Adding <code>e.stopPropagation()</code> ensures that only the delete action is executed.",
+          "whyItHappens": "React’s synthetic events follow DOM bubbling rules. The click event from the button naturally bubbles to the parent <code>div</code> (the card). Without <code>stopPropagation</code>, both handlers run, causing unintended behavior."
+        }
+      ]
     }
   ],
   "typescript": [
@@ -313,6 +339,39 @@
       ]
     },
     {
+      "title": "useMemo Hook",
+      "content": "<p><b>useMemo</b> is a React Hook that memoizes the result of a calculation between renders. It only recomputes the memoized value when one of its dependencies changes. This helps optimize performance by avoiding expensive recalculations during every render.</p>",
+      "examples": [
+        {
+          "code": "import { useState, useMemo } from \"react\";\n\nfunction ExpensiveCalc({ num }) {\n  const calculation = useMemo(() => {\n    console.log(\"♻️ Recalculating...\");\n    let total = 0;\n    for (let i = 0; i < 1e7; i++) {\n      total += num * 2;\n    }\n    return total;\n  }, [num]);\n\n  return <p>Result: {calculation}</p>;\n}\n\nexport default function App() {\n  const [count, setCount] = useState(0);\n  const [other, setOther] = useState(false);\n\n  return (\n    <div>\n      <h2>Count: {count}</h2>\n      <button onClick={() => setCount(c => c + 1)}>Increment</button>\n      <button onClick={() => setOther(o => !o)}>Toggle Other</button>\n      <ExpensiveCalc num={count} />\n      <p>Other state: {other.toString()}</p>\n    </div>\n  );\n}",
+          "description": "This example shows how <code>useMemo</code> caches an expensive calculation. Toggling the 'Other' state causes a re-render, but the calculation only reruns when <code>num</code> changes.",
+          "whyItHappens": "React re-renders components when state changes. Without <code>useMemo</code>, the expensive loop runs every time. With <code>useMemo</code>, the result is cached and only recomputed if dependencies change, saving performance."
+        }
+      ]
+    },
+    {
+      "title": "useCallback Hook",
+      "content": "<p><b>useCallback</b> is a React Hook that memoizes a function reference so that it is stable between renders unless its dependencies change. This is especially useful when passing callbacks to memoized child components to prevent unnecessary re-renders.</p>",
+      "examples": [
+        {
+          "code": "import { useState, useCallback, memo } from \"react\";\n\nconst Child = memo(({ onClick }) => {\n  console.log(\"👶 Child re-rendered\");\n  return <button onClick={onClick}>Click Child</button>;\n});\n\nexport default function App() {\n  const [count, setCount] = useState(0);\n  const [other, setOther] = useState(false);\n\n  const increment = useCallback(() => {\n    setCount(c => c + 1);\n  }, []);\n\n  return (\n    <div>\n      <h2>Count: {count}</h2>\n      <button onClick={() => setOther(o => !o)}>Toggle Other</button>\n      <Child onClick={increment} />\n    </div>\n  );\n}",
+          "description": "Here, <code>useCallback</code> ensures that the <code>increment</code> function reference remains the same across renders. Combined with <code>React.memo</code> in the child, this prevents the child from re-rendering unnecessarily when unrelated state changes.",
+          "whyItHappens": "Without <code>useCallback</code>, every render creates a new function, causing memoized children to re-render. By stabilizing the function reference, React can skip re-rendering the child when props have not changed."
+        }
+      ]
+    },
+    {
+      "title": "useImperativeHandle Hook",
+      "content": "<p><b>useImperativeHandle</b> is a React Hook that customizes the values exposed when a parent component uses <code>ref</code> with <code>forwardRef</code>. Instead of exposing the raw DOM node, it lets you define a custom API (methods or values) that the parent can call directly.</p>",
+      "examples": [
+        {
+          "code": "import { useRef, forwardRef, useImperativeHandle, useState } from \"react\";\n\nconst Counter = forwardRef((props, ref) => {\n  const [count, setCount] = useState(0);\n\n  useImperativeHandle(ref, () => ({\n    increment: () => setCount(c => c + 1),\n    decrement: () => setCount(c => c - 1),\n    reset: () => setCount(0),\n    getValue: () => count\n  }));\n\n  return <h2>Count: {count}</h2>;\n});\n\nexport default function App() {\n  const counterRef = useRef();\n\n  return (\n    <div>\n      <Counter ref={counterRef} />\n      <button onClick={() => counterRef.current.increment()}>Increment</button>\n      <button onClick={() => counterRef.current.decrement()}>Decrement</button>\n      <button onClick={() => alert(counterRef.current.getValue())}>Show Value</button>\n    </div>\n  );\n}",
+          "description": "This example demonstrates using <code>useImperativeHandle</code> to expose custom methods from the child component. The parent can call <code>increment</code>, <code>decrement</code>, and <code>getValue</code> directly via the ref.",
+          "whyItHappens": "<code>useImperativeHandle</code> works with <code>forwardRef</code> to override what is assigned to the ref. Instead of exposing the child’s DOM node, it provides a controlled API that the parent can use to interact with the child."
+        }
+      ]
+    },
+    {
       "title": "useReducer Hook",
       "content": "<p><b>useReducer</b> is a React Hook used for managing complex state logic in a component. It is an alternative to <code>useState</code> and is particularly useful when state involves multiple sub-values or when state updates depend on the previous state. <b>useReducer</b> takes a <code>reducer</code> function and an <code>initialState</code>, returning a pair: the current <code>state</code> and a <code>dispatch</code> function to send actions that describe how to update the state.</p>",
       "examples": [
@@ -325,6 +384,22 @@
           "code": "import { useReducer } from \"react\";\n\nconst initialState = {\n  formValues: { name: '', age: '', email: '' }\n};\n\nfunction formReducer(state, action) {\n  switch (action.type) {\n    case 'UPDATE_FIELD':\n      return {\n        ...state,\n        formValues: {\n          ...state.formValues,\n          [action.field]: action.value\n        }\n      };\n    default:\n      return state;\n  }\n}\n\nexport default function Form() {\n  const [state, dispatch] = useReducer(formReducer, initialState);\n\n  return (\n    <form>\n      <input\n        value={state.formValues.name}\n        placeholder=\"Name\"\n        onChange={e => dispatch({ type: 'UPDATE_FIELD', field: 'name', value: e.target.value })}\n      />\n      <input\n        value={state.formValues.age}\n        placeholder=\"Age\"\n        onChange={e => dispatch({ type: 'UPDATE_FIELD', field: 'age', value: e.target.value })}\n      />\n      <input\n        value={state.formValues.email}\n        placeholder=\"Email\"\n        onChange={e => dispatch({ type: 'UPDATE_FIELD', field: 'email', value: e.target.value })}\n      />\n      <pre>{JSON.stringify(state.formValues, null, 2)}</pre>\n    </form>\n  );\n}",
           "description": "Here, <code>useReducer</code> manages a form with multiple fields. The reducer handles an 'UPDATE_FIELD' action to dynamically update any form field while preserving the other fields.",
           "whyItHappens": "Using a reducer for form state centralizes updates and makes it easier to manage multiple related fields. Each dispatched action carries the field name and value, and the reducer merges it with the existing state."
+        }
+      ]
+    },
+    {
+      "title": "Custom Hook - useFetch",
+      "content": "<p><b>Custom Hooks</b> in React are reusable functions that encapsulate stateful logic using React’s built-in hooks. A common practical example is <code>useFetch</code>, which handles API data fetching, loading state, and error handling in one place. This avoids repeating the same fetch logic across multiple components and keeps code cleaner.</p>",
+      "examples": [
+        {
+          "code": "import { useState, useEffect } from \"react\";\n\nexport function useFetch(url) {\n  const [data, setData] = useState(null);\n  const [loading, setLoading] = useState(true);\n  const [error, setError] = useState(null);\n\n  useEffect(() => {\n    let ignore = false;\n\n    async function fetchData() {\n      try {\n        const response = await fetch(url);\n        if (!response.ok) throw new Error(\"Network error\");\n        const result = await response.json();\n        if (!ignore) setData(result);\n      } catch (err) {\n        if (!ignore) setError(err.message);\n      } finally {\n        if (!ignore) setLoading(false);\n      }\n    }\n\n    fetchData();\n    return () => { ignore = true; };\n  }, [url]);\n\n  return { data, loading, error };\n}",
+          "description": "This <code>useFetch</code> hook encapsulates the logic for fetching data from an API. It returns an object with <code>data</code>, <code>loading</code>, and <code>error</code>, making it easy to reuse in different components.",
+          "whyItHappens": "Fetching data often involves repetitive patterns: managing loading state, catching errors, and storing results. A custom hook centralizes this logic so that components stay focused on rendering, while the hook handles side effects."
+        },
+        {
+          "code": "import { useFetch } from \"./useFetch\";\n\nexport default function App() {\n  const { data, loading, error } = useFetch(\"https://jsonplaceholder.typicode.com/posts\");\n\n  if (loading) return <p>Loading...</p>;\n  if (error) return <p>Error: {error}</p>;\n\n  return (\n    <ul>\n      {data.map(post => (\n        <li key={post.id}>{post.title}</li>\n      ))}\n    </ul>\n  );\n}",
+          "description": "This example shows how the <code>useFetch</code> hook is used inside a component. The component doesn’t worry about the fetching logic, only about displaying <code>data</code>, <code>loading</code>, or <code>error</code>.",
+          "whyItHappens": "Separating data-fetching logic into a custom hook makes the component more focused and reusable. Multiple components can consume the same hook without duplicating logic."
         }
       ]
     }

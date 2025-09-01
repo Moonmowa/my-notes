@@ -14,6 +14,7 @@ import DragDropExample from "./Practice/DragDrop";
 import DragDropExample2 from "./Practice/DragDrop2";
 import DragDrop3 from "./Practice/DragDrop3";
 import Article from "./Components/Articles/Article";
+import Counter from "./Practice/counter";
 export default function App() {
   const [activeTab, setActiveTab] = useState("javascript");
   const [selectedTopic, setSelectedTopic] = useState(null);
@@ -36,6 +37,7 @@ export default function App() {
         {/* <Form /> */}
         {/* <Stopwatch /> */}
         {/* <Timer /> */}
+        {/* <Counter /> */}
     </div>
     // </ThemeContextProvider>
 
